@@ -17,6 +17,8 @@ NOTE: GUILD_MEMBER_UPDATE is always sent for the current user, regardless of the
 # CHANNEL_DELETE, CHANNEL_PINS_UPDATE
 GUILDS = 1 << 0
 # GUILD_MEMBER_ADD, GUILD_MEMBER_UPDATE, GUILD_MEMBER_REMOVE
+# NOTE: This is a `privileged` intent. The application must have this intent
+#       enabled in the Discord Developer Portal.
 GUILD_MEMBERS = 1 << 1
 # GUILD_BAN_ADD, GUILD_BAN_REMOVE
 GUILD_BANS = 1 << 2
@@ -31,6 +33,8 @@ GUILD_INVITES = 1 << 6
 # VOICE_STATE_UPDATE
 GUILD_VOICE_STATES = 1 << 7
 # PRESENCE_UPDATE
+# NOTE: This is a `privileged` intent. The application must have this intent
+#       enabled in the Discord Developer Portal.
 GUILD_PRESENCES = 1 << 8
 # MESSAGE_CREATE, MESSAGE_UPDATE, MESSAGE_DELETE, MESSAGE_DELETE_BULK
 GUILD_MESSAGES = 1 << 9

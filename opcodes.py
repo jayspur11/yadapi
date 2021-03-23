@@ -4,6 +4,8 @@ All gateway events in Discord are tagged with an opcode that denotes the payload
 type.
 """
 
+key = "op"
+
 """ INCOMING OPCODES """
 # An event was dispatched.
 DISPATCH = 0

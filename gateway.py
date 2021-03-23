@@ -1,3 +1,4 @@
+import heartbeat
 import json
 import websockets
 
@@ -7,6 +8,9 @@ from urllib import request as urlrequest
 _BASE_API_URL = "https://discord.com/api"
 _GATEWAY_ENDPOINT = "/gateway"
 _BOT_GATEWAY_ENDPOINT = "/gateway/bot"
+
+# Singletons
+_HEARTBEAT = None
 
 
 def _get_gateway_information(app_name, bot_token):
@@ -26,10 +30,11 @@ def _get_gateway_information(app_name, bot_token):
 
 
 async def connect(app_name, bot_token):
+    global _HEARTBEAT
     gateway_info = _get_gateway_information(app_name, bot_token)
     gateway_url = gateway_info["url"] + "?v=8&encoding=json"
     websocket = await websockets.connect(gateway_url)
     greeting = json.loads(await websocket.recv())
-    # TODO: start heartbeat
+    _HEARTBEAT = heartbeat.Heartbeat(websocket, greeting["d"]["interval"])
     # TODO: identify
     return websocket

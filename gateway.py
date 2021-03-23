@@ -28,4 +28,8 @@ def _get_gateway_information(app_name, bot_token):
 async def connect(app_name, bot_token):
     gateway_info = _get_gateway_information(app_name, bot_token)
     gateway_url = gateway_info["url"] + "?v=8&encoding=json"
-    return await websockets.connect(gateway_url)
+    websocket = await websockets.connect(gateway_url)
+    greeting = json.loads(await websocket.recv())
+    # TODO: start heartbeat
+    # TODO: identify
+    return websocket

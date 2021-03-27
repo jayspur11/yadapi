@@ -24,15 +24,18 @@ def start(websocket, interval_ms):
     _schedule_next()
 
 
-async def fire():
+async def fire(_=None, scheduled=False):
     global _websocket
     global _last_ack
     global _last_send
 
-    if _last_send and (not _last_ack or _last_send > _last_ack):
-        await gateway.resume()
-    else:
+    acked_after_send = not _last_send or (_last_ack and _last_send < _last_ack)
+    if not scheduled or acked_after_send:
         await _websocket.send(_HEARTBEAT_PAYLOAD)
+        _last_send = time.time()
+    else:
+        await gateway.resume(close_code=1001,
+                             close_reason="Missed heartbeat ack.")
 
 
 async def ack():
@@ -42,10 +45,14 @@ async def ack():
 
 
 async def stop():
+    global _last_ack
+    global _last_send
     global _next_beat
 
     _next_beat.cancel()
     _next_beat = None
+    _last_send = None
+    _last_ack = None
 
 
 # Private methods
@@ -59,5 +66,5 @@ async def _delayed_fire():
     global _interval_sec
 
     await asyncio.sleep(_interval_sec)
-    await fire()
+    await fire(scheduled=True)
     _schedule_next()

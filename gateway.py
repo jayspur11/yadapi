@@ -35,6 +35,8 @@ async def start(app_name, bot_token, intents, operating_system):
 
 async def resume(app_name, bot_token, close_code=1000, close_reason=""):
     global _connection
+    global _sequence_number
+    global _session_id
 
     if None in [_connection, _session_id, _sequence_number]:
         raise RuntimeError(

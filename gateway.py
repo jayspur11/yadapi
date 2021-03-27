@@ -1,3 +1,4 @@
+from websockets.exceptions import InvalidState
 import heartbeat
 import json
 import opcodes
@@ -12,7 +13,10 @@ _BOT_GATEWAY_ENDPOINT = "/gateway/bot"
 _DATA_KEY = "d"
 
 # Singletons
-_HEARTBEAT = None
+_connection = None
+_heartbeat = None
+_sequence_number = None
+_session_id = None
 
 
 def _get_gateway_information(app_name, bot_token):
@@ -31,24 +35,59 @@ def _get_gateway_information(app_name, bot_token):
     return gateway_info
 
 
-async def connect(app_name, bot_token, intents, operating_system, library_name):
-    global _HEARTBEAT
+async def _connect(app_name, bot_token):
+    global _heartbeat
+    global _connection
+
     gateway_info = _get_gateway_information(app_name, bot_token)
     gateway_url = gateway_info["url"] + "?v=8&encoding=json"
-    websocket = await websockets.connect(gateway_url)
-    greeting = json.loads(await websocket.recv())
-    _HEARTBEAT = heartbeat.Heartbeat(websocket, greeting[_DATA_KEY]["interval"])
-    await websocket.send(json.dumps({
+    _connection = await websockets.connect(gateway_url)
+    greeting = json.loads(await _connection.recv())
+    _heartbeat = heartbeat.Heartbeat(_connection,
+                                     greeting[_DATA_KEY]["interval"])
+
+    return _connection
+
+
+async def start(app_name, bot_token, intents, operating_system):
+    connection = await _connect(app_name, bot_token)
+    identity_payload = json.dumps({
         opcodes.key: opcodes.IDENTIFY,
         _DATA_KEY: {
             "token": bot_token,
             "intents": intents,
             "properties": {
                 "$os": operating_system,
-                "$browser": library_name,
-                "$device": library_name
+                "$browser": app_name,
+                "$device": app_name
             }
         }
-    }))
-    ready = json.loads(await websocket.recv())
-    return websocket
+    })
+    await connection.send(identity_payload)
+    ready = json.loads(await connection.recv())
+    # TODO: process Ready event
+
+
+async def resume(app_name, bot_token, close_code=1000, close_reason=""):
+    global _connection
+    global _heartbeat
+
+    if None in [_connection, _session_id, _sequence_number]:
+        raise InvalidState
+
+    # TODO: stop heartbeat
+    await _connection.close(code=close_code, reason=close_reason)
+    _connection = None
+
+    connection = await _connect(app_name, bot_token)
+    resume_payload = json.dumps({
+        opcodes.key: opcodes.RESUME,
+        _DATA_KEY: {
+            "token": bot_token,
+            "session_id": _session_id,
+            "seq": _sequence_number
+        }
+    })
+    await connection.send(resume_payload)
+    # After this, we start receiving backlogged events -- `RESUMED` doesn't come
+    # until later.

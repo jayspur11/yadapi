@@ -89,5 +89,25 @@ async def resume(app_name, bot_token, close_code=1000, close_reason=""):
         }
     })
     await connection.send(resume_payload)
-    # After this, we start receiving backlogged events -- `RESUMED` doesn't come
-    # until later.
+
+
+async def _revalidate():
+    pass
+
+
+async def _process_greeting():
+    pass
+
+
+async def _receive(connection, event_callback):
+    opcode_router = {
+        opcodes.DISPATCH: event_callback,
+        opcodes.RECONNECT: resume,
+        opcodes.INVALID_SESSION: _revalidate,
+        opcodes.HELLO: _process_greeting,
+        opcodes.HEARTBEAT_ACK: _heartbeat.ack,
+        opcodes.HEARTBEAT: _heartbeat.fire
+    }
+    payload = await json.loads(connection.recv())
+    # TODO: pass args
+    await opcode_router[payload[opcodes.key]]()

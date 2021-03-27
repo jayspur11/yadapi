@@ -20,3 +20,6 @@ class Heartbeat:
 
     async def fire(self):
         await self._gateway.send(_HEARTBEAT_DATA)
+        
+    async def ack(self):
+        pass

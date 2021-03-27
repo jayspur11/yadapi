@@ -30,7 +30,9 @@ async def fire(_=None, scheduled=False):
     global _last_send
 
     acked_after_send = not _last_send or (_last_ack and _last_send < _last_ack)
-    if not scheduled or acked_after_send:
+    if not scheduled:
+        await _websocket.send(_HEARTBEAT_PAYLOAD)
+    elif acked_after_send:
         await _websocket.send(_HEARTBEAT_PAYLOAD)
         _last_send = time.time()
     else:

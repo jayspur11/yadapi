@@ -13,7 +13,11 @@ class Payload:
         return cls(payload.get(_OPCODE_KEY), payload.get(_DATA_KEY),
                    payload.get(_SEQNO_KEY), payload.get(_EVENT_KEY))
 
-    def __init__(self, opcode, data, sequence_number=None, event_name=None):
+    def __init__(self,
+                 opcode,
+                 data=None,
+                 sequence_number=None,
+                 event_name=None):
         self.opcode = opcode
         self.data = data
         self.sequence_number = sequence_number

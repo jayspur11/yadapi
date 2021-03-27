@@ -1,1 +1,1 @@
-# discord-api
+# YADAPI - Yet Another Discord API

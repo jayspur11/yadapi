@@ -23,10 +23,16 @@ _session_id = None
 
 
 # Public methods
-async def restart(_=None, close_code=1000, close_reason=""):
+async def restart(close_code=1000, close_reason=""):
+    """Close the connection to the gateway and reopen (resuming the session).
+
+    Args:
+        close_code (int, optional): Code to close the connection with. Defaults to 1000 (clean).
+        close_reason (str, optional): Reason for closing the connection. Defaults to "".
+    """
     await heartbeat.stop()
-    await socket.close(close_code, close_reason)
     _receiver.cancel()
+    await socket.close(close_code, close_reason)
 
     await _resume()
 
@@ -135,7 +141,7 @@ async def _start_receiver_loop():
     # NOTE: All actions must be async; the receiver will await them.
     opcode_router = {
         opcodes.DISPATCH: lambda payload: _process_event(payload),
-        opcodes.RECONNECT: lambda _: _resume(),
+        opcodes.RECONNECT: lambda _: restart(),
         opcodes.INVALID_SESSION:
         lambda payload: _process_invalid_session(payload),
         opcodes.HELLO: lambda payload: _process_greeting(payload),

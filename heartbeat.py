@@ -8,9 +8,7 @@ from payload import Payload
 
 _HEARTBEAT_PAYLOAD = Payload(opcodes.HEARTBEAT).dumps()
 
-_interval_sec = None
 _last_ack = None
-_last_send = None
 _next_beat = None
 
 
@@ -21,16 +19,9 @@ async def ack():
     _last_ack = time.time()
 
 
-async def fire(scheduled=False):
-    global _last_ack
-    global _last_send
-
-    acked_after_send = not _last_send or (_last_ack and _last_send < _last_ack)
-    if not scheduled:
+async def fire(last_send=None):
+    if not last_send or (_last_ack and last_send < _last_ack):
         await socket.send(_HEARTBEAT_PAYLOAD)
-    elif acked_after_send:
-        await socket.send(_HEARTBEAT_PAYLOAD)
-        _last_send = time.time()
     else:
         await gateway.restart(close_code=1001,
                               close_reason="Missed heartbeat ack.")
@@ -45,17 +36,15 @@ def start(interval_ms):
 
 async def stop():
     global _last_ack
-    global _last_send
-    global _next_beat
 
     _next_beat.cancel()
-    _next_beat = None
-    _last_send = None
     _last_ack = None
 
 
 # Private methods
 async def _start_heartbeat(interval_sec):
+    last_send = None
     while True:
         await asyncio.sleep(interval_sec)
-        await fire(scheduled=True)
+        await fire(last_send)
+        last_send = time.time()

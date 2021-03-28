@@ -15,13 +15,13 @@ _next_beat = None
 
 
 # Public methods
-async def ack(_):
+async def ack():
     global _last_ack
 
     _last_ack = time.time()
 
 
-async def fire(_=None, scheduled=False):
+async def fire(scheduled=False):
     global _last_ack
     global _last_send
 

@@ -97,19 +97,19 @@ async def _process_greeting(payload):
 
 async def _receive():
     opcode_router = {
-        opcodes.DISPATCH: _process_event,
-        opcodes.RECONNECT: _resume,
-        opcodes.INVALID_SESSION: _revalidate,
-        opcodes.HELLO: _process_greeting,
-        opcodes.HEARTBEAT_ACK: heartbeat.ack,
-        opcodes.HEARTBEAT: heartbeat.fire
+        opcodes.DISPATCH: lambda payload: _process_event(payload),
+        opcodes.RECONNECT: lambda _: _resume(),
+        opcodes.INVALID_SESSION: lambda payload: _revalidate(payload),
+        opcodes.HELLO: lambda payload: _process_greeting(payload),
+        opcodes.HEARTBEAT_ACK: lambda _: heartbeat.ack(),
+        opcodes.HEARTBEAT: lambda _: heartbeat.fire()
     }
     while True:
         payload = await Payload.receive(socket.recv())
         await opcode_router[payload.opcode](payload)
 
 
-async def _resume(_=None):
+async def _resume():
     if None in [_session_id, _sequence_number]:
         raise RuntimeError(
             "Tried resuming with missing info about prior connection.")

@@ -1,12 +1,12 @@
 import asyncio
-import heartbeat
 import json
-import opcodes
 import socket
 import time
 
-from payload import Payload
-from rate_counter import RateCounter
+from gateway import heartbeat
+from gateway import opcodes
+from gateway.payload import Payload
+from gateway.rate_counter import RateCounter
 from urllib import request as urlrequest
 
 _BASE_API_URL = "https://discord.com/api"

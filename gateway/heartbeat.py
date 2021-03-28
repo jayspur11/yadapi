@@ -1,10 +1,10 @@
 import asyncio
-import gateway
-import opcodes
 import socket
 import time
 
-from payload import Payload
+from gateway import connection
+from gateway import opcodes
+from gateway.payload import Payload
 
 _HEARTBEAT_PAYLOAD = Payload(opcodes.HEARTBEAT).dumps()
 
@@ -32,8 +32,8 @@ async def fire(last_send=None):
     if not last_send or (_last_ack and last_send < _last_ack):
         await socket.send(_HEARTBEAT_PAYLOAD)
     else:
-        await gateway.restart(close_code=1001,
-                              close_reason="Missed heartbeat ack.")
+        await connection.restart(close_code=1001,
+                                 close_reason="Missed heartbeat ack.")
 
 
 def start(interval_ms):

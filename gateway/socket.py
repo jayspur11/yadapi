@@ -1,7 +1,7 @@
 import time
 import websockets
 
-from rate_counter import RateCounter
+from gateway.rate_counter import RateCounter
 
 _RATE_LIMIT = 2
 

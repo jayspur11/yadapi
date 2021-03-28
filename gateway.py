@@ -9,7 +9,6 @@ from urllib import request as urlrequest
 
 # Constants
 _BASE_API_URL = "https://discord.com/api"
-_GATEWAY_ENDPOINT = "/gateway"
 _BOT_GATEWAY_ENDPOINT = "/gateway/bot"
 
 # Singletons
@@ -61,12 +60,8 @@ async def resume(app_name, bot_token, close_code=1000, close_reason=""):
 
 # Private methods
 def _get_gateway_information(app_name, bot_token):
-    headers = {"User-Agent": app_name}
-    if bot_token:
-        headers["Authorization"] = "Bot " + bot_token
-        endpoint = _BOT_GATEWAY_ENDPOINT
-    else:
-        endpoint = _GATEWAY_ENDPOINT
+    headers = {"User-Agent": app_name, "Authorization": "Bot " + bot_token}
+    endpoint = _BOT_GATEWAY_ENDPOINT
 
     gateway_request = urlrequest.Request(_BASE_API_URL + endpoint,
                                          headers=headers)

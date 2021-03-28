@@ -2,19 +2,16 @@ import asyncio
 import heartbeat
 import json
 import opcodes
-import websockets
+import socket
 
 from payload import Payload
 from urllib import request as urlrequest
 
-# Constants
 _BASE_API_URL = "https://discord.com/api"
 _BOT_GATEWAY_ENDPOINT = "/gateway/bot"
 
-# Singletons
 _app_name = None
 _bot_token = None
-_connection = None
 _intents = None
 _operating_system = None
 _receiver = None
@@ -24,12 +21,12 @@ _session_id = None
 
 # Public methods
 async def restart(_=None, close_code=1000, close_reason=""):
-    if None in [_connection, _session_id, _sequence_number]:
+    if None in [_session_id, _sequence_number]:
         raise RuntimeError(
             "Tried resuming with missing info about prior connection.")
 
     await heartbeat.stop()
-    await _connection.close(code=close_code, reason=close_reason)
+    await socket.close(close_code, close_reason)
     _receiver.cancel()
 
     await _resume()
@@ -51,12 +48,11 @@ async def start(app_name, bot_token, intents, operating_system):
 
 # Private methods
 async def _connect():
-    global _connection
     global _receiver
 
     gateway_info = _get_gateway_information()
     gateway_url = gateway_info["url"] + "?v=8&encoding=json"
-    _connection = await websockets.connect(gateway_url)
+    socket.connect(gateway_url)
     _receiver = asyncio.get_event_loop().create_task(_receive())
 
 
@@ -73,6 +69,7 @@ def _get_gateway_information():
 
 
 async def _identify():
+    # TODO: rate limit
     await _connect()
     identity_data = {
         "token": _bot_token,
@@ -84,7 +81,7 @@ async def _identify():
         }
     }
     identity_payload = Payload(opcodes.IDENTIFY, identity_data)
-    await _connection.send(identity_payload.dumps())
+    await socket.send(identity_payload.dumps())
 
 
 async def _process_event(payload):
@@ -93,7 +90,7 @@ async def _process_event(payload):
 
 
 async def _process_greeting(payload):
-    heartbeat.start(_connection, payload.data["interval"])
+    heartbeat.start(payload.data["interval"])
 
 
 async def _receive():
@@ -106,7 +103,7 @@ async def _receive():
         opcodes.HEARTBEAT: heartbeat.fire
     }
     while True:
-        payload = await Payload.receive(_connection.recv())
+        payload = await Payload.receive(socket.recv())
         await opcode_router[payload.opcode](payload)
 
 
@@ -118,7 +115,7 @@ async def _resume(_=None):
         "seq": _sequence_number
     }
     resume_payload = Payload(opcodes.RESUME, resume_data)
-    await _connection.send(resume_payload.dumps())
+    await socket.send(resume_payload.dumps())
 
 
 async def _revalidate(payload):

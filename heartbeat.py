@@ -1,6 +1,7 @@
 import asyncio
 import gateway
 import opcodes
+import socket
 import time
 
 from payload import Payload
@@ -11,7 +12,6 @@ _interval_sec = None
 _last_ack = None
 _last_send = None
 _next_beat = None
-_websocket = None
 
 
 # Public methods
@@ -22,26 +22,23 @@ async def ack(_):
 
 
 async def fire(_=None, scheduled=False):
-    global _websocket
     global _last_ack
     global _last_send
 
     acked_after_send = not _last_send or (_last_ack and _last_send < _last_ack)
     if not scheduled:
-        await _websocket.send(_HEARTBEAT_PAYLOAD)
+        await socket.send(_HEARTBEAT_PAYLOAD)
     elif acked_after_send:
-        await _websocket.send(_HEARTBEAT_PAYLOAD)
+        await socket.send(_HEARTBEAT_PAYLOAD)
         _last_send = time.time()
     else:
         await gateway.restart(close_code=1001,
                               close_reason="Missed heartbeat ack.")
 
 
-def start(websocket, interval_ms):
-    global _websocket
+def start(interval_ms):
     global _interval_sec
 
-    _websocket = websocket
     _interval_sec = interval_ms / 1000
     _schedule_next()
 

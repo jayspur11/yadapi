@@ -30,8 +30,8 @@ async def restart(close_code=1000, close_reason=""):
         close_code (int, optional): Code to close the connection with. Defaults to 1000 (clean).
         close_reason (str, optional): Reason for closing the connection. Defaults to "".
     """
-    await heartbeat.stop()
     _receiver.cancel()
+    await heartbeat.stop()
     await socket.close(close_code, close_reason)
 
     await _resume()

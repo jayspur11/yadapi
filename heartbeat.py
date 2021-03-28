@@ -37,10 +37,10 @@ async def fire(scheduled=False):
 
 
 def start(interval_ms):
-    global _interval_sec
+    global _next_beat
 
-    _interval_sec = interval_ms / 1000
-    _schedule_next()
+    _next_beat = asyncio.get_event_loop().create_task(
+        _start_heartbeat(interval_ms / 1000))
 
 
 async def stop():
@@ -55,15 +55,7 @@ async def stop():
 
 
 # Private methods
-async def _delayed_fire():
-    global _interval_sec
-
-    await asyncio.sleep(_interval_sec)
-    await fire(scheduled=True)
-    _schedule_next()
-
-
-def _schedule_next():
-    global _next_beat
-
-    _next_beat = asyncio.get_event_loop().create_task(_delayed_fire())
+async def _start_heartbeat(interval_sec):
+    while True:
+        await asyncio.sleep(interval_sec)
+        await fire(scheduled=True)

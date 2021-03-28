@@ -8,6 +8,8 @@ async def close(code=1000, reason=""):
 
 
 async def connect(url):
+    global _connection
+
     _connection = await websockets.connect(url)
 
 

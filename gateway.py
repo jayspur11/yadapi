@@ -1,3 +1,4 @@
+import asyncio
 import heartbeat
 import json
 import opcodes
@@ -13,6 +14,7 @@ _BOT_GATEWAY_ENDPOINT = "/gateway/bot"
 
 # Singletons
 _connection = None
+_receiver = None
 _sequence_number = None
 _session_id = None
 
@@ -35,6 +37,7 @@ async def start(app_name, bot_token, intents, operating_system):
 
 async def resume(app_name, bot_token, close_code=1000, close_reason=""):
     global _connection
+    global _receiver
     global _sequence_number
     global _session_id
 
@@ -44,7 +47,7 @@ async def resume(app_name, bot_token, close_code=1000, close_reason=""):
 
     await heartbeat.stop()
     await _connection.close(code=close_code, reason=close_reason)
-    _connection = None
+    _receiver.cancel()
 
     connection = await _connect(app_name, bot_token)
     resume_data = {
@@ -75,11 +78,12 @@ def _get_gateway_information(app_name, bot_token):
 
 async def _connect(app_name, bot_token):
     global _connection
+    global _receiver
 
     gateway_info = _get_gateway_information(app_name, bot_token)
     gateway_url = gateway_info["url"] + "?v=8&encoding=json"
     _connection = await websockets.connect(gateway_url)
-    # TODO: start receiving
+    _receiver = asyncio.get_event_loop().create_task(_receive())
     return _connection
 
 
@@ -114,5 +118,4 @@ async def _receive():
     }
     while True:
         payload = await Payload.receive(_connection.recv())
-        # TODO: pass args
-        await opcode_router[payload.opcode]()
+        await opcode_router[payload.opcode](payload)

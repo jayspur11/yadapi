@@ -95,26 +95,11 @@ async def _process_greeting(payload):
     heartbeat.start(payload.data["interval"])
 
 
-async def _start_receiver_loop():
-    """Set up an infinite loop to receive and process gateway payloads.
-    
-    NOTE: This is meant to be a background process. Do NOT await this.
-    """
-    # Glorified switch-statement.
-    # Each opcode maps to a lambda, which wraps the actual action being taken.
-    # This means the receiver has a known arg list to pass.
-    # NOTE: All actions must be async; the receiver will await them.
-    opcode_router = {
-        opcodes.DISPATCH: lambda payload: _process_event(payload),
-        opcodes.RECONNECT: lambda _: _resume(),
-        opcodes.INVALID_SESSION: lambda payload: _revalidate(payload),
-        opcodes.HELLO: lambda payload: _process_greeting(payload),
-        opcodes.HEARTBEAT_ACK: lambda _: heartbeat.ack(),
-        opcodes.HEARTBEAT: lambda _: heartbeat.fire()
-    }
-    while True:
-        payload = await Payload.receive(socket.recv())
-        await opcode_router[payload.opcode](payload)
+async def _process_invalid_session(payload):
+    if payload.data:  # Usually a dict, but this time it's boolean.
+        await _resume()
+    else:
+        await _identify()
 
 
 async def _resume():
@@ -139,8 +124,24 @@ async def _resume():
     await socket.send(resume_payload.dumps())
 
 
-async def _revalidate(payload):
-    if payload.data:
-        await _resume()
-    else:
-        await _identify()
+async def _start_receiver_loop():
+    """Set up an infinite loop to receive and process gateway payloads.
+    
+    NOTE: This is meant to be a background process. Do NOT await this.
+    """
+    # Glorified switch-statement.
+    # Each opcode maps to a lambda, which wraps the actual action being taken.
+    # This means the receiver has a known arg list to pass.
+    # NOTE: All actions must be async; the receiver will await them.
+    opcode_router = {
+        opcodes.DISPATCH: lambda payload: _process_event(payload),
+        opcodes.RECONNECT: lambda _: _resume(),
+        opcodes.INVALID_SESSION:
+        lambda payload: _process_invalid_session(payload),
+        opcodes.HELLO: lambda payload: _process_greeting(payload),
+        opcodes.HEARTBEAT_ACK: lambda _: heartbeat.ack(),
+        opcodes.HEARTBEAT: lambda _: heartbeat.fire()
+    }
+    while True:
+        payload = await Payload.receive(socket.recv())
+        await opcode_router[payload.opcode](payload)

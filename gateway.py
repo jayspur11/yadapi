@@ -42,7 +42,7 @@ async def resume(app_name, bot_token, close_code=1000, close_reason=""):
         raise RuntimeError(
             "Tried resuming with missing info about prior connection.")
 
-    # TODO: stop heartbeat
+    await heartbeat.stop()
     await _connection.close(code=close_code, reason=close_reason)
     _connection = None
 

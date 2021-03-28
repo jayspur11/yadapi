@@ -52,7 +52,7 @@ async def _connect():
     gateway_info = _get_gateway_information()
     gateway_url = gateway_info["url"] + "?v=8&encoding=json"
     socket.connect(gateway_url)
-    _receiver = asyncio.get_event_loop().create_task(_receive())
+    _receiver = asyncio.get_event_loop().create_task(_start_receiver_loop())
 
 
 def _get_gateway_information():
@@ -95,7 +95,15 @@ async def _process_greeting(payload):
     heartbeat.start(payload.data["interval"])
 
 
-async def _receive():
+async def _start_receiver_loop():
+    """Sets up an infinite loop to receive and process gateway payloads.
+    
+    NOTE: This is meant to be a background process. Do NOT await this.
+    """
+    # Glorified switch-statement.
+    # Each opcode maps to a lambda, which wraps the actual action being taken.
+    # This means the receiver has a known arg list to pass.
+    # NOTE: All actions must be async; the receiver will await them.
     opcode_router = {
         opcodes.DISPATCH: lambda payload: _process_event(payload),
         opcodes.RECONNECT: lambda _: _resume(),

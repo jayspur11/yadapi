@@ -21,10 +21,6 @@ _session_id = None
 
 # Public methods
 async def restart(_=None, close_code=1000, close_reason=""):
-    if None in [_session_id, _sequence_number]:
-        raise RuntimeError(
-            "Tried resuming with missing info about prior connection.")
-
     await heartbeat.stop()
     await socket.close(close_code, close_reason)
     _receiver.cancel()
@@ -108,6 +104,10 @@ async def _receive():
 
 
 async def _resume(_=None):
+    if None in [_session_id, _sequence_number]:
+        raise RuntimeError(
+            "Tried resuming with missing info about prior connection.")
+
     await _connect()
     resume_data = {
         "token": _bot_token,

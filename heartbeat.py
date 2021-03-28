@@ -36,11 +36,11 @@ async def fire(_=None, scheduled=False):
         await _websocket.send(_HEARTBEAT_PAYLOAD)
         _last_send = time.time()
     else:
-        await gateway.resume(close_code=1001,
-                             close_reason="Missed heartbeat ack.")
+        await gateway.restart(close_code=1001,
+                              close_reason="Missed heartbeat ack.")
 
 
-async def ack():
+async def ack(_):
     global _last_ack
 
     _last_ack = time.time()

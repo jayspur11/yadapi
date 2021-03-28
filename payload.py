@@ -7,12 +7,14 @@ _EVENT_KEY = "t"
 
 
 class Payload:
+    # Class methods
     @classmethod
     def receive(cls, payload_string):
         payload = json.loads(payload_string)
         return cls(payload.get(_OPCODE_KEY), payload.get(_DATA_KEY),
                    payload.get(_SEQNO_KEY), payload.get(_EVENT_KEY))
 
+    # Instance methods
     def __init__(self,
                  opcode,
                  data=None,

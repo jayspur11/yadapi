@@ -23,6 +23,18 @@ _session_id = None
 
 
 # Public methods
+async def restart(_=None, close_code=1000, close_reason=""):
+    if None in [_connection, _session_id, _sequence_number]:
+        raise RuntimeError(
+            "Tried resuming with missing info about prior connection.")
+
+    await heartbeat.stop()
+    await _connection.close(code=close_code, reason=close_reason)
+    _receiver.cancel()
+
+    await _resume()
+
+
 async def start(app_name, bot_token, intents, operating_system):
     global _app_name
     global _bot_token
@@ -37,19 +49,17 @@ async def start(app_name, bot_token, intents, operating_system):
     await _identify()
 
 
-async def restart(_=None, close_code=1000, close_reason=""):
-    if None in [_connection, _session_id, _sequence_number]:
-        raise RuntimeError(
-            "Tried resuming with missing info about prior connection.")
-
-    await heartbeat.stop()
-    await _connection.close(code=close_code, reason=close_reason)
-    _receiver.cancel()
-
-    await _resume()
-
-
 # Private methods
+async def _connect():
+    global _connection
+    global _receiver
+
+    gateway_info = _get_gateway_information()
+    gateway_url = gateway_info["url"] + "?v=8&encoding=json"
+    _connection = await websockets.connect(gateway_url)
+    _receiver = asyncio.get_event_loop().create_task(_receive())
+
+
 def _get_gateway_information():
     headers = {"User-Agent": _app_name, "Authorization": "Bot " + _bot_token}
     endpoint = _BOT_GATEWAY_ENDPOINT
@@ -62,26 +72,24 @@ def _get_gateway_information():
     return gateway_info
 
 
-async def _connect():
-    global _connection
-    global _receiver
-
-    gateway_info = _get_gateway_information()
-    gateway_url = gateway_info["url"] + "?v=8&encoding=json"
-    _connection = await websockets.connect(gateway_url)
-    _receiver = asyncio.get_event_loop().create_task(_receive())
+async def _identify():
+    await _connect()
+    identity_data = {
+        "token": _bot_token,
+        "intents": _intents,
+        "properties": {
+            "$os": _operating_system,
+            "$browser": _app_name,
+            "$device": _app_name
+        }
+    }
+    identity_payload = Payload(opcodes.IDENTIFY, identity_data)
+    await _connection.send(identity_payload.dumps())
 
 
 async def _process_event(payload):
     # Gonna need to break this up by event title. Whee!
     pass
-
-
-async def _revalidate(payload):
-    if payload.data:
-        await _resume()
-    else:
-        await _identify()
 
 
 async def _process_greeting(payload):
@@ -102,21 +110,6 @@ async def _receive():
         await opcode_router[payload.opcode](payload)
 
 
-async def _identify():
-    await _connect()
-    identity_data = {
-        "token": _bot_token,
-        "intents": _intents,
-        "properties": {
-            "$os": _operating_system,
-            "$browser": _app_name,
-            "$device": _app_name
-        }
-    }
-    identity_payload = Payload(opcodes.IDENTIFY, identity_data)
-    await _connection.send(identity_payload.dumps())
-
-
 async def _resume(_=None):
     await _connect()
     resume_data = {
@@ -126,3 +119,10 @@ async def _resume(_=None):
     }
     resume_payload = Payload(opcodes.RESUME, resume_data)
     await _connection.send(resume_payload.dumps())
+
+
+async def _revalidate(payload):
+    if payload.data:
+        await _resume()
+    else:
+        await _identify()

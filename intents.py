@@ -43,7 +43,7 @@ DIRECT_MESSAGE_REACTIONS = 1 << 13
 # TYPING_START
 DIRECT_MESSAGE_TYPING = 1 << 14
 
-""" PRIVILEGED INTENTS """
+# PRIVILEGED INTENTS
 # The application must have the below intents enabled in the Developer Portal.
 
 # GUILD_MEMBER_ADD, GUILD_MEMBER_UPDATE, GUILD_MEMBER_REMOVE

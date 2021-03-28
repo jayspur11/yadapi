@@ -4,9 +4,8 @@ All gateway events in Discord are tagged with an opcode that denotes the payload
 type.
 """
 
-key = "op"
+# INCOMING OPCODES
 
-""" INCOMING OPCODES """
 # An event was dispatched.
 DISPATCH = 0
 # Client should attempt to reconnect and resume immediately.
@@ -22,7 +21,8 @@ HELLO = 10
 #       resume.
 HEARTBEAT_ACK = 11
 
-""" OUTGOING OPCODES """
+# OUTGOING OPCODES
+
 # Fired periodically by the client to keep the connection alive.
 # NOTE: The gateway can use this to request a heartbeat, and the client should
 #       send a heartbeat back as normal.

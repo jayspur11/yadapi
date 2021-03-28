@@ -15,13 +15,10 @@ _last_ack = None
 
 
 # Public methods
-def start(websocket, interval_ms):
-    global _websocket
-    global _interval_sec
+async def ack(_):
+    global _last_ack
 
-    _websocket = websocket
-    _interval_sec = interval_ms / 1000
-    _schedule_next()
+    _last_ack = time.time()
 
 
 async def fire(_=None, scheduled=False):
@@ -40,10 +37,13 @@ async def fire(_=None, scheduled=False):
                               close_reason="Missed heartbeat ack.")
 
 
-async def ack(_):
-    global _last_ack
+def start(websocket, interval_ms):
+    global _websocket
+    global _interval_sec
 
-    _last_ack = time.time()
+    _websocket = websocket
+    _interval_sec = interval_ms / 1000
+    _schedule_next()
 
 
 async def stop():
@@ -58,15 +58,15 @@ async def stop():
 
 
 # Private methods
-def _schedule_next():
-    global _next_beat
-
-    _next_beat = asyncio.get_event_loop().create_task(_delayed_fire())
-
-
 async def _delayed_fire():
     global _interval_sec
 
     await asyncio.sleep(_interval_sec)
     await fire(scheduled=True)
     _schedule_next()
+
+
+def _schedule_next():
+    global _next_beat
+
+    _next_beat = asyncio.get_event_loop().create_task(_delayed_fire())

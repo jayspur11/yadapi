@@ -1,3 +1,4 @@
+import time
 import websockets
 
 from rate_counter import RateCounter
@@ -24,7 +25,7 @@ async def recv():
 
 async def send(payload):
     if _counter.rate() > _RATE_LIMIT:
-        # TODO: rate limit
-        pass
+        # We've exceeded the rate limit. Wait for an event to drop off.
+        time.sleep(_counter.next_event())
     _counter.add()
     await _connection.send(payload)

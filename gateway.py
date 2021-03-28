@@ -3,6 +3,7 @@ import heartbeat
 import json
 import opcodes
 import socket
+import time
 
 from payload import Payload
 from rate_counter import RateCounter
@@ -79,8 +80,8 @@ async def _identify():
     }
     identity_payload = Payload(opcodes.IDENTIFY, identity_data)
     if len(_identify_counter) > 1:  # TODO: use max_concurrency
-        # TODO: rate limit
-        pass
+        # We've exceeded the rate limit. Wait for an event to drop off.
+        time.sleep(_identify_counter.next_event())
     _identify_counter.add()
     await socket.send(identity_payload.dumps())
 

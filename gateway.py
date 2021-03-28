@@ -5,6 +5,7 @@ import opcodes
 import socket
 
 from payload import Payload
+from rate_counter import RateCounter
 from urllib import request as urlrequest
 
 _BASE_API_URL = "https://discord.com/api"
@@ -12,6 +13,7 @@ _BOT_GATEWAY_ENDPOINT = "/gateway/bot"
 
 _app_name = None
 _bot_token = None
+_identify_counter = RateCounter(5)
 _intents = None
 _operating_system = None
 _receiver = None
@@ -65,7 +67,6 @@ def _get_gateway_information():
 
 
 async def _identify():
-    # TODO: rate limit
     await _connect()
     identity_data = {
         "token": _bot_token,
@@ -77,6 +78,10 @@ async def _identify():
         }
     }
     identity_payload = Payload(opcodes.IDENTIFY, identity_data)
+    if len(_identify_counter) > 1:  # TODO: use max_concurrency
+        # TODO: rate limit
+        pass
+    _identify_counter.add()
     await socket.send(identity_payload.dumps())
 
 

@@ -1,6 +1,11 @@
 import websockets
 
+from rate_counter import RateCounter
+
+_RATE_LIMIT = 2
+
 _connection = None
+_counter = RateCounter(60)
 
 
 async def close(code=1000, reason=""):
@@ -18,5 +23,8 @@ async def recv():
 
 
 async def send(payload):
-    # TODO: rate limit
+    if _counter.rate() > _RATE_LIMIT:
+        # TODO: rate limit
+        pass
+    _counter.add()
     await _connection.send(payload)

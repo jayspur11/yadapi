@@ -7,11 +7,11 @@ from payload import Payload
 
 _HEARTBEAT_PAYLOAD = Payload(opcodes.HEARTBEAT).dumps()
 
-_websocket = None
 _interval_sec = None
-_next_beat = None
-_last_send = None
 _last_ack = None
+_last_send = None
+_next_beat = None
+_websocket = None
 
 
 # Public methods

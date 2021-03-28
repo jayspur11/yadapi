@@ -96,7 +96,7 @@ async def _process_greeting(payload):
 
 
 async def _start_receiver_loop():
-    """Sets up an infinite loop to receive and process gateway payloads.
+    """Set up an infinite loop to receive and process gateway payloads.
     
     NOTE: This is meant to be a background process. Do NOT await this.
     """
@@ -118,6 +118,13 @@ async def _start_receiver_loop():
 
 
 async def _resume():
+    """Connect to the gateway and send a RESUME command.
+    
+    NOTE: This must be called after a prior connection that IDENTIFY'd.
+
+    Raises:
+        RuntimeError: There wasn't enough information to send a RESUME command.
+    """
     if None in [_session_id, _sequence_number]:
         raise RuntimeError(
             "Tried resuming with missing info about prior connection.")

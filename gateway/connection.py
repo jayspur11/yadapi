@@ -23,11 +23,13 @@ _session_id = None
 
 # Public methods
 async def restart(close_code=1000, close_reason=""):
-    """Close the connection to the gateway and reopen (resuming the session).
+    """Close the connection to the gateway and resume the previous session.
 
     Args:
-        close_code (int, optional): Code to close the connection with. Defaults to 1000 (clean).
-        close_reason (str, optional): Reason for closing the connection. Defaults to "".
+        close_code (int, optional): Code to close the connection with.
+            Defaults to 1000 (clean).
+        close_reason (str, optional): Reason for closing the connection.
+            Defaults to "".
     """
     event_handler.stop_receiving()
     await heartbeat.stop()
@@ -37,6 +39,14 @@ async def restart(close_code=1000, close_reason=""):
 
 
 async def start(app_name, bot_token, intents, operating_system):
+    """Open a gateway connection and start a new session.
+
+    Args:
+        app_name (str): Name of the app using the connection.
+        bot_token (str): Discord Bot identifying token.
+        intents (int): Gateway events to subscribe to.
+        operating_system (str): Operating system using the connection.
+    """
     global _app_name
     global _bot_token
     global _intents
@@ -52,6 +62,8 @@ async def start(app_name, bot_token, intents, operating_system):
 
 # Internal methods
 async def _identify():
+    """Connect to the gateway and send an IDENTIFY command.
+    """
     await _connect()
     identity_data = {
         "token": _bot_token,
@@ -94,6 +106,8 @@ async def _resume():
 
 # Private methods
 async def _connect():
+    """Retrieve gateway information and open a websocket connection.
+    """
     global _receiver
 
     gateway_info = _get_gateway_information()

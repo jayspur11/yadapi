@@ -22,7 +22,7 @@ _session_id = None
 
 
 # Public methods
-async def restart(close_code=1000, close_reason=""):
+async def restart(close_code=1000, close_reason="", resume=True):
     """Close the connection to the gateway and resume the previous session.
 
     Args:
@@ -34,8 +34,10 @@ async def restart(close_code=1000, close_reason=""):
     event_handler.stop_receiving()
     await heartbeat.stop()
     await socket.close(close_code, close_reason)
-
-    await _resume()
+    if resume:
+        await _resume()
+    else:
+        await _identify()
 
 
 async def start(app_name, bot_token, intents, operating_system):

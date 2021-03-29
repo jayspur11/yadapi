@@ -26,17 +26,6 @@ async def _process_event(payload):
     pass
 
 
-async def _process_greeting(payload):
-    heartbeat.start(payload.data["interval"])
-
-
-async def _process_invalid_session(payload):
-    if payload.data:  # Usually a dict, but this time it's boolean.
-        await connection._resume()
-    else:
-        await connection._identify()
-
-
 async def _start_receiving_loop():
     """Set up an infinite loop to receive and process gateway payloads.
     
@@ -50,8 +39,9 @@ async def _start_receiving_loop():
         opcodes.DISPATCH: lambda payload: _process_event(payload),
         opcodes.RECONNECT: lambda _: connection.restart(),
         opcodes.INVALID_SESSION:
-        lambda payload: _process_invalid_session(payload),
-        opcodes.HELLO: lambda payload: _process_greeting(payload),
+        lambda payload: connection.restart(payload.data),
+        opcodes.HELLO:
+        lambda payload: heartbeat.start(payload.data["interval"]),
         opcodes.HEARTBEAT_ACK: lambda _: heartbeat.ack(),
         opcodes.HEARTBEAT: lambda _: heartbeat.fire()
     }

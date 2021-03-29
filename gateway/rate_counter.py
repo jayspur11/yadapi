@@ -15,7 +15,7 @@ class RateCounter:
 
     def add(self):
         self._values.put(time.time())
-        
+
     def next_event(self):
         try:
             next = self._values.get(block=False)

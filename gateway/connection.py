@@ -62,7 +62,30 @@ async def start(app_name, bot_token, intents, operating_system):
     await _identify()
 
 
-# Internal methods
+# Private methods
+async def _connect():
+    """Retrieve gateway information and open a websocket connection.
+    """
+    global _receiver
+
+    gateway_info = _get_gateway_information()
+    gateway_url = gateway_info["url"] + "?v=8&encoding=json"
+    await socket.connect(gateway_url)
+    event_handler.start_receiving()
+
+
+def _get_gateway_information():
+    headers = {"User-Agent": _app_name, "Authorization": "Bot " + _bot_token}
+    endpoint = _BOT_GATEWAY_ENDPOINT
+
+    gateway_request = urlrequest.Request(_BASE_API_URL + endpoint,
+                                         headers=headers)
+    with urlrequest.urlopen(gateway_request) as gateway_response:
+        gateway_info = json.load(gateway_response)
+
+    return gateway_info
+
+
 async def _identify():
     """Connect to the gateway and send an IDENTIFY command.
     """
@@ -104,27 +127,3 @@ async def _resume():
     }
     resume_payload = Payload(opcodes.RESUME, resume_data)
     await socket.send(resume_payload.dumps())
-
-
-# Private methods
-async def _connect():
-    """Retrieve gateway information and open a websocket connection.
-    """
-    global _receiver
-
-    gateway_info = _get_gateway_information()
-    gateway_url = gateway_info["url"] + "?v=8&encoding=json"
-    await socket.connect(gateway_url)
-    event_handler.start_receiving()
-
-
-def _get_gateway_information():
-    headers = {"User-Agent": _app_name, "Authorization": "Bot " + _bot_token}
-    endpoint = _BOT_GATEWAY_ENDPOINT
-
-    gateway_request = urlrequest.Request(_BASE_API_URL + endpoint,
-                                         headers=headers)
-    with urlrequest.urlopen(gateway_request) as gateway_response:
-        gateway_info = json.load(gateway_response)
-
-    return gateway_info

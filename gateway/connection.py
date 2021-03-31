@@ -66,7 +66,7 @@ async def _connect():
     """
     global _receiver
 
-    gateway_info = gateway.bot()
+    gateway_info = gateway.get_bot()
     gateway_url = gateway_info["url"] + "?v=8&encoding=json"
     await socket.connect(gateway_url)
     event_handler.start_receiving()

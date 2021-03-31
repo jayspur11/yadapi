@@ -1,4 +1,4 @@
-import json
+import restapi
 import socket
 import time
 
@@ -7,7 +7,7 @@ from gateway import heartbeat
 from gateway import opcodes
 from gateway.payload import Payload
 from gateway.rate_counter import RateCounter
-from restapi import request
+from restapi import gateway
 
 _app_name = None
 _bot_token = None
@@ -51,6 +51,7 @@ async def start(app_name, bot_token, intents, operating_system):
     global _intents
     global _operating_system
 
+    restapi.initialize(app_name, bot_token)  # TODO: move this up
     _app_name = app_name
     _bot_token = bot_token
     _intents = intents
@@ -65,7 +66,7 @@ async def _connect():
     """
     global _receiver
 
-    gateway_info = request.gateway_bot(_app_name, _bot_token)
+    gateway_info = gateway.bot()
     gateway_url = gateway_info["url"] + "?v=8&encoding=json"
     await socket.connect(gateway_url)
     event_handler.start_receiving()

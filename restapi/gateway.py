@@ -1,16 +1,9 @@
-import json
-
+from urllib.request import Request
 from restapi import _core
-from urllib.request import Request, urlopen
 
 
 # Public methods
 def get_bot():
     url = _core.BASE_API_URL + "/gateway/bot"
-    headers = {
-        "User-Agent": _core.app_name,
-        "Authorization": "Bot " + _core.bot_token
-    }
-    request = Request(url, headers=headers)
-    with urlopen(request) as response:
-        return json.load(response)
+    request = Request(url)
+    return _core.make_request(request)

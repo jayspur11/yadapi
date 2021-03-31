@@ -5,7 +5,7 @@ from urllib.request import Request, urlopen
 
 
 # Public methods
-async def get_bot():
+def get_bot():
     url = _core.BASE_API_URL + "/gateway/bot"
     headers = {
         "User-Agent": _core.app_name,

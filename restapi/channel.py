@@ -2,16 +2,8 @@ from urllib.request import Request
 from restapi import _core
 
 
-def _channel_endpoint(path):
-    return _core.BASE_API_URL + "/channels/" + path
-
-
-def _message_endpoint(channel_id, path):
-    return _channel_endpoint(channel_id + "messages/" + path)
-
-
 def get_channel(channel_id):
-    url = _channel_endpoint(channel_id)
+    url = _core.endpoint("channels", channel_id)
     request = Request(url)
     return _core.make_request(request)
 
@@ -33,6 +25,6 @@ def get_messages(channel_id,
         query.append("after=" + after_message)
     query = "?" + "&".join(query) if query else ""
 
-    url = _message_endpoint(channel_id, query)
+    url = _core.endpoint("channels", channel_id, "messages") + query
     request = Request(url)
     return _core.make_request(request)

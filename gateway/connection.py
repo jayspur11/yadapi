@@ -7,10 +7,7 @@ from gateway import heartbeat
 from gateway import opcodes
 from gateway.payload import Payload
 from gateway.rate_counter import RateCounter
-from urllib import request as urlrequest
-
-_BASE_API_URL = "https://discord.com/api"
-_BOT_GATEWAY_ENDPOINT = "/gateway/bot"
+from restapi import request
 
 _app_name = None
 _bot_token = None
@@ -68,22 +65,10 @@ async def _connect():
     """
     global _receiver
 
-    gateway_info = _get_gateway_information()
+    gateway_info = request.gateway_bot(_app_name, _bot_token)
     gateway_url = gateway_info["url"] + "?v=8&encoding=json"
     await socket.connect(gateway_url)
     event_handler.start_receiving()
-
-
-def _get_gateway_information():
-    headers = {"User-Agent": _app_name, "Authorization": "Bot " + _bot_token}
-    endpoint = _BOT_GATEWAY_ENDPOINT
-
-    gateway_request = urlrequest.Request(_BASE_API_URL + endpoint,
-                                         headers=headers)
-    with urlrequest.urlopen(gateway_request) as gateway_response:
-        gateway_info = json.load(gateway_response)
-
-    return gateway_info
 
 
 async def _identify():

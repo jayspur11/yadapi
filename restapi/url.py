@@ -1,5 +1,5 @@
 class URL:
-    def __init__(self, path=""):
+    def __init__(self, path):
         self._root = "https://discord.com/api/v8"
         self._path = path
         self._query = {}

@@ -1,10 +1,11 @@
 from urllib.request import Request
 from restapi import _core
+from restapi import url
 
 
 def get_channel(channel_id):
-    url = _core.endpoint("channels", channel_id)
-    request = Request(url)
+    endpoint = url.URL(path="/channels/{cid}".format(cid=channel_id))
+    request = Request(endpoint.build())
     return _core.make_request(request)
 
 
@@ -13,18 +14,13 @@ def get_messages(channel_id,
                  around_message=None,
                  before_message=None,
                  after_message=None):
-    query = []
-    if limit:
-        query.append("limit=" + str(limit))
-    # Mutually exclusive
-    if around_message:
-        query.append("around=" + around_message)
-    elif before_message:
-        query.append("before=" + before_message)
-    elif after_message:
-        query.append("after=" + after_message)
-    query = "?" + "&".join(query) if query else ""
+    endpoint = url.URL("/channels/{cid}/messages".format(cid=channel_id))
+    endpoint.add_query_params({
+        "limit": str(limit),
+        "around": around_message,
+        "before": before_message,
+        "after": after_message
+    })
 
-    url = _core.endpoint("channels", channel_id, "messages") + query
-    request = Request(url)
+    request = Request(endpoint.build())
     return _core.make_request(request)

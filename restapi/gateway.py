@@ -1,9 +1,10 @@
 from urllib.request import Request
 from restapi import _core
+from restapi import url
 
 
 # Public methods
 def get_bot():
-    url = _core.endpoint("gateway", "bot")
-    request = Request(url)
+    endpoint = url.URL(path="/gateway/bot")
+    request = Request(endpoint.build())
     return _core.make_request(request)

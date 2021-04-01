@@ -24,3 +24,10 @@ def get_messages(channel_id,
 
     request = Request(endpoint.build())
     return _core.make_request(request)
+
+
+def get_message(channel_id, message_id):
+    endpoint = url.URL("/channels/{cid}/messages/{mid}".format(cid=channel_id,
+                                                               mid=message_id))
+    request = Request(endpoint.build())
+    return _core.make_request(request)

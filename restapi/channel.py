@@ -4,7 +4,7 @@ from restapi import url
 
 
 def get_channel(channel_id):
-    endpoint = url.URL(path="/channels/{cid}".format(cid=channel_id))
+    endpoint = url.URL("/channels/{cid}".format(cid=channel_id))
     request = Request(endpoint.build())
     return _core.make_request(request)
 

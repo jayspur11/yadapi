@@ -49,3 +49,41 @@ def get_invites(channel_id):
 def get_pinned_messages(channel_id):
     endpoint = url.URL(f"/channels/{channel_id}/pins")
     return _core.make_get_request(endpoint)
+
+
+def get_thread_members(channel_id):
+    endpoint = url.URL(f"/channels/{channel_id}/threads-members")
+    return _core.make_get_request(endpoint)
+
+
+def get_active_threads(channel_id):
+    endpoint = url.URL(f"/channels/{channel_id}/threads/active")
+    return _core.make_get_request(endpoint)
+
+
+def get_public_archived_threads(channel_id, before=None, limit=None):
+    endpoint = url.URL(f"/channels/{channel_id}/threads/archived/public")
+    endpoint.add_query_params({
+        "before": before,
+        "limit": str(limit)
+    })
+    return _core.make_get_request(endpoint)
+
+
+def get_private_archived_threads(channel_id, before=None, limit=None):
+    endpoint = url.URL(f"/channels/{channel_id}/threads/archived/private")
+    endpoint.add_query_params({
+        "before": before,
+        "limit": str(limit)
+    })
+    return _core.make_get_request(endpoint)
+
+
+def get_joined_private_archived_threads(channel_id, before=None, limit=None):
+    endpoint = url.URL(f"/channels/{channel_id}/users/@me/threads/archived/"
+                       f"private")
+    endpoint.add_query_params({
+        "before": before,
+        "limit": str(limit)
+    })
+    return _core.make_get_request(endpoint)

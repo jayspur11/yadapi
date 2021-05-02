@@ -1,3 +1,4 @@
+from urllib.parse import quote
 from urllib.request import Request
 from restapi import _core
 from restapi import url
@@ -29,5 +30,17 @@ def get_messages(channel_id,
 def get_message(channel_id, message_id):
     endpoint = url.URL("/channels/{cid}/messages/{mid}".format(cid=channel_id,
                                                                mid=message_id))
+    request = Request(endpoint.build())
+    return _core.make_request(request)
+
+
+def get_reactions(channel_id, message_id, emoji, after=None, limit=None):
+    emoji_urlsafe = quote(emoji, safe="")
+    endpoint = url.URL(f"/channels/{channel_id}/messages/{message_id}/reactions"
+                       f"/{emoji_urlsafe}")
+    endpoint.add_query_params({
+        "after": after,
+        "limit": str(limit)
+    })
     request = Request(endpoint.build())
     return _core.make_request(request)

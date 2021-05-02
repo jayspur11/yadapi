@@ -50,3 +50,9 @@ def get_invites(channel_id):
     endpoint = url.URL(f"/channels/{channel_id}/invites")
     request = Request(endpoint.build())
     return _core.make_request(request)
+
+
+def get_pinned_messages(channel_id):
+    endpoint = url.URL(f"/channels/{channel_id}/pins")
+    request = Request(endpoint.build())
+    return _core.make_request(request)

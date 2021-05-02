@@ -5,7 +5,7 @@ from restapi import url
 
 
 def get_channel(channel_id):
-    endpoint = url.URL("/channels/{cid}".format(cid=channel_id))
+    endpoint = url.URL(f"/channels/{channel_id}")
     return _core.make_get_request(endpoint)
 
 
@@ -14,7 +14,7 @@ def get_messages(channel_id,
                  around_message=None,
                  before_message=None,
                  after_message=None):
-    endpoint = url.URL("/channels/{cid}/messages".format(cid=channel_id))
+    endpoint = url.URL(f"/channels/{channel_id}/messages")
     endpoint.add_query_params({
         "limit": str(limit),
         "around": around_message,
@@ -26,8 +26,7 @@ def get_messages(channel_id,
 
 
 def get_message(channel_id, message_id):
-    endpoint = url.URL("/channels/{cid}/messages/{mid}".format(cid=channel_id,
-                                                               mid=message_id))
+    endpoint = url.URL(f"/channels/{channel_id}/messages/{message_id}")
     return _core.make_get_request(endpoint)
 
 

@@ -10,7 +10,6 @@ class URL:
              for k, v in query_params.items() if v is not None})
 
     def build(self):
-        query = "?" + "&".join(
-            ["{k}={v}".format(k=k, v=v)
-             for k, v in self._query.items()]) if self._query else ""
+        query = "?" + "&".join([f"{k}={v}" for k, v in self._query.items()
+                                ]) if self._query else ""
         return self._root + self._path + query

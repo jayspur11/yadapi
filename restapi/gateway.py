@@ -1,6 +1,4 @@
-from urllib.request import Request
 from restapi import _core
-from restapi import url
 
 
 # Public methods

@@ -4,7 +4,9 @@ from restapi import url
 
 
 # Public methods
+def get_gateway():
+    return _core.make_get_request("/gateway")
+
+
 def get_bot():
-    endpoint = url.URL("/gateway/bot")
-    request = Request(endpoint.build())
-    return _core.make_request(request)
+    return _core.make_get_request("/gateway/bot")

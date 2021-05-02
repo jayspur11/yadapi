@@ -44,3 +44,9 @@ def get_reactions(channel_id, message_id, emoji, after=None, limit=None):
     })
     request = Request(endpoint.build())
     return _core.make_request(request)
+
+
+def get_invites(channel_id):
+    endpoint = url.URL(f"/channels/{channel_id}/invites")
+    request = Request(endpoint.build())
+    return _core.make_request(request)

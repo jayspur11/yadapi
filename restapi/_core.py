@@ -6,7 +6,9 @@ app_name = None
 bot_token = None
 
 
-def make_get_request(endpoint: url.URL):
+def make_get_request(endpoint_path: str, query_params={}: dict):
+    endpoint = url.URL(endpoint_path)
+    endpoint.add_query_params(query_params)
     request = Request(endpoint.build())
     return make_request(request)
 

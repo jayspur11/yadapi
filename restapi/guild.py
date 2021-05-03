@@ -81,9 +81,19 @@ def get_welcome_screen(guild_id):
     return _core.make_get_request(f"/guilds/{guild_id}/welcome-screen")
 
 
+# Emojis #######################################################################
 def get_emoji_list(guild_id):
     return _core.make_get_request(f"/guilds/{guild_id}/emojis")
 
 
 def get_emoji(guild_id, emoji_id):
     return _core.make_get_request(f"/guilds/{guild_id}/emojis/{emoji_id}")
+
+
+# Templates ####################################################################
+def get_template(template_code):
+    return _core.make_get_request(f"/guilds/templates/{template_code}")
+
+
+def get_template_list(guild_id):
+    return _core.make_get_request(f"/guilds/{guild_id}/templates")

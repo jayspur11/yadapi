@@ -79,3 +79,11 @@ def get_widget_image(guild_id):
 
 def get_welcome_screen(guild_id):
     return _core.make_get_request(f"/guilds/{guild_id}/welcome-screen")
+
+
+def get_emoji_list(guild_id):
+    return _core.make_get_request(f"/guilds/{guild_id}/emojis")
+
+
+def get_emoji(guild_id, emoji_id):
+    return _core.make_get_request(f"/guilds/{guild_id}/emojis/{emoji_id}")

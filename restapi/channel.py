@@ -77,3 +77,8 @@ def get_joined_private_archived_threads(channel_id, before=None, limit=None):
             "before": before,
             "limit": str(limit)
         })
+
+
+# Webhooks #####################################################################
+def get_webhook_list(channel_id):
+    return _core.make_get_request(f"/channels/{channel_id}/webhooks")

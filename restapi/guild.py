@@ -97,3 +97,8 @@ def get_template(template_code):
 
 def get_template_list(guild_id):
     return _core.make_get_request(f"/guilds/{guild_id}/templates")
+
+
+# Webhooks #####################################################################
+def get_webhook_list(guild_id):
+    return _core.make_get_request(f"/guilds/{guild_id}/webhooks")
